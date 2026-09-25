@@ -25,14 +25,14 @@
 
         | Part | File | Contents |
         | --- | --- | --- |
-        | §1 | `00_overview/00-purpose.md` | 00 Purpose |
-| §2 | `00_overview/10-current-architecture.md` | 10 Current Architecture |
-| §3 | `10_service-contract/20-contracts.md` | 20 Contracts |
-| §4 | `20_runtime/30-runtime-boundary.md` | Runtime Boundary |
-| §5 | `30_dependencies/30-integration-boundaries.md` | 30 Integration Boundaries |
-| §6 | `40_governance/40-governance.md` | Governance |
-| §7 | `50_operations/40-verification-gates.md` | 40 Verification Gates |
-| §8 | `99_appendices/90-appendices.md` | Appendices |
+        | §1 | `00-purpose.md` | 00 Purpose |
+| §2 | `10-current-architecture.md` | 10 Current Architecture |
+| §3 | `20-contracts.md` | 20 Contracts |
+| §4 | `30-runtime-boundary.md` | Runtime Boundary |
+| §5 | `30-integration-boundaries.md` | 30 Integration Boundaries |
+| §6 | `40-governance.md` | Governance |
+| §7 | `40-verification-gates.md` | 40 Verification Gates |
+| §8 | `90-appendices.md` | Appendices |
 
         ## Quick Assembly
 
