@@ -30,3 +30,20 @@ canonical mutation guard before FailureForge expands to a new target.
 `SandboxRun.v1` runner-produced records include canonical source hashes before
 and after execution plus a mutation flag. Minimal historical run records remain
 valid for compatibility.
+
+## Report hash
+
+`HardeningReport.v1` has an optional `report_hash`. It is the SHA-256 of every other
+field, written like `receipt_hash`: `json.dumps(report without report_hash,
+sort_keys=True, separators=(",", ":"), ensure_ascii=False)`.
+
+- `build_hardening_report` always sets it. A report written before this field stays valid.
+- `compute_report_hash`, `apply_report_hash` and `verify_report_hash` are in
+  `failureforge.validation`.
+- A ranked finding has a float `score`. Python writes a float with its shortest
+  round-trip text, for example `1e-07` and `100.0`. A program in another language
+  must write the same text to recompute the hash. Until a float rule is agreed, such a
+  program can read the stored hash but cannot check it.
+- The hash lets a consumer bind a report to an attestation. The forge_contract_core
+  family `failureforge_handoff_attestation_payload` carries it as
+  `hardening_report_hash` (RFC-FFQ-01).

@@ -47,6 +47,49 @@ def verify_receipt_hash(receipt: dict[str, Any]) -> None:
         )
 
 
+# ---- HardeningReport --------------------------------------------------
+
+
+class ReportHashMismatch(Exception):
+    """Raised when a hardening report's stored hash does not match its computed hash."""
+
+
+def compute_report_hash(report: dict[str, Any]) -> str:
+    """Compute the commitment for a HardeningReport.
+
+    It is defined exactly like ``compute_receipt_hash``: the hash covers every field
+    except ``report_hash`` itself. A ranked finding carries a float ``score``. Python
+    writes that float with its shortest round-trip form, and the hash depends on that
+    text. A program in another language must reproduce it byte for byte to recompute
+    this hash.
+    """
+    payload = {k: v for k, v in report.items() if k != "report_hash"}
+    return hashlib.sha256(_canonical(payload)).hexdigest()
+
+
+def apply_report_hash(report: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of ``report`` with ``report_hash`` set to its canonical hash."""
+    body = dict(report)
+    body["report_hash"] = compute_report_hash(body)
+    return body
+
+
+def verify_report_hash(report: dict[str, Any]) -> None:
+    """Raise ReportHashMismatch if the stored hash does not match the contents.
+
+    A report with no ``report_hash`` also raises. Callers that accept older reports
+    must check for the field first.
+    """
+    stored = report.get("report_hash")
+    if not stored:
+        raise ReportHashMismatch("report has no report_hash field")
+    expected = compute_report_hash(report)
+    if stored != expected:
+        raise ReportHashMismatch(
+            f"report_hash mismatch: stored={stored} computed={expected}"
+        )
+
+
 # ---- ApprovalReceipt --------------------------------------------------
 
 

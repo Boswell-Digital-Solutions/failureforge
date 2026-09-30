@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from failureforge.validation import (
+    apply_report_hash,
     validate_failure_receipt,
     validate_hardening_report,
     verify_receipt_hash,
@@ -215,8 +216,10 @@ def build_hardening_report(
 ) -> dict[str, Any]:
     """Build a HardeningReport.v1 dict, validate it, and return it.
 
-    Receipts must already pass schema validation and hash verification
-    (callers are expected to feed verified receipts in)."""
+    The report carries a ``report_hash`` that commits to every other field, so a
+    later reader can tell whether it changed. Receipts must already pass schema
+    validation and hash verification (callers are expected to feed verified
+    receipts in)."""
     receipts_list = list(receipts)
     findings = score_findings(receipts_list)
     reproducible_total = sum(1 for r in receipts_list if r.get("reproducible"))
@@ -236,6 +239,7 @@ def build_hardening_report(
         "receipts_total": len(receipts_list),
         "reproducible_total": reproducible_total,
     }
+    report = apply_report_hash(report)
     validate_hardening_report(report)
     return report
 

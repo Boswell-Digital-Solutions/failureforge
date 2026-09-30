@@ -70,6 +70,11 @@
     },
     "created_at": {"type": "string", "format": "date-time"},
     "receipts_total": {"type": "integer", "minimum": 0},
-    "reproducible_total": {"type": "integer", "minimum": 0}
+    "reproducible_total": {"type": "integer", "minimum": 0},
+    "report_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Optional. SHA-256 commitment to every other field, computed like receipt_hash (failureforge.validation.hashing.compute_report_hash). A report without it is still valid."
+    }
   }
 }
