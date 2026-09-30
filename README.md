@@ -105,6 +105,11 @@ sibling **`dataforge-Local`** repo (and needs FastAPI). Those tests skip cleanly
 when this repo is checked out standalone (e.g. in its own CI); they run when
 `dataforge-Local` is present alongside this repo and FastAPI is installed.
 
+> **Open gap (2026-09-30).** `dataforge-Local` does not contain `app/failureforge/`.
+> With the sibling present and FastAPI installed, these tests do not skip; the
+> `app.failureforge` imports inside them are expected to fail. See
+> [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md), FF-20260930-001.
+
 ## Layout
 
 ```
@@ -136,8 +141,10 @@ failureforge/
     verify_receipts.sh
 ```
 
-DataForge Local owns the operator API and persistence-facing Slice 04-18
-integration under `dataforge-Local/app/failureforge/`.
+DataForge Local is specified to own the operator API and persistence-facing
+Slice 04-18 integration under `dataforge-Local/app/failureforge/`. That package
+does not exist in `dataforge-Local` today; see
+[`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md), FF-20260930-001.
 
 ## Demo
 
