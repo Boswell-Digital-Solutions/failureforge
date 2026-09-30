@@ -4,13 +4,13 @@ This file tracks open defects, gaps, and their history. Each entry has a date, w
 
 ## 2026-09-30 Cross-repo integration with DataForge Local, Forge Command and ERA — FF-20260930
 
-**Evidence.** Read-only source review of `failureforge`, `dataforge-Local`, `Forge_Command`, `ERA` and `bds-QRE`, all on branch `claude/failureforge-bad-qre-integration-66koo8`. The test suite was not run: this environment has no pytest.
+**Evidence.** Read-only source review of `failureforge`, `dataforge-Local`, `Forge_Command`, `ERA` and `bds-QRE`, all on branch `claude/failureforge-bad-qre-integration-66koo8`, and one run of `scripts/ci_gate.sh` in a local virtualenv.
 
 ### FF-20260930-001 — The DataForge Local server side does not exist (Open)
 
 **What is wrong:** `README.md` and `CLAUDE.md` say DataForge Local owns the operator API under `dataforge-Local/app/failureforge/`. That package does not exist in `dataforge-Local`, and its `app/main.py` mounts no FailureForge router. Every HTTP client in this repository targets routes that no server provides: `persistence/dataforge_client.py`, `promotion/client.py` and `forgecommand/client.py`. The CLI commands `morning-report`, `view-run` and `view-receipt` cannot succeed.
 
-**Test impact (inferred, not run):** slices 04 to 06 and the reconciliation half of slice 10 skip only when FastAPI is absent or the `dataforge-Local` folder is absent. With both present, the tests import `app.failureforge.*` inside test helpers, so they are expected to fail, not skip.
+**Test impact (measured 2026-09-30):** slices 04 to 06 and the reconciliation half of slice 10 skip only when FastAPI is absent or the `dataforge-Local` folder is absent. With both present, the tests import `app.failureforge.*` inside test helpers and fail, not skip. `pytest` with the sibling present: `test_dataforge_same_receipt_id_same_hash_is_accepted_successfully` and `test_dataforge_same_receipt_id_different_valid_hash_is_rejected_immutable` fail with `ModuleNotFoundError`. CI does not see this, because the sibling is absent there.
 
 **Root cause:** not determined. The `dataforge-Local` clone is shallow, so an earlier removal is not ruled out. Tracked also in `dataforge-Local/docs/KNOWN_ISSUES.md`.
 
@@ -51,3 +51,13 @@ This file tracks open defects, gaps, and their history. Each entry has a date, w
 ### FF-20260930-005 — No link to bds-QRE (Observation)
 
 No plan connects FailureForge to the Quality-Ratchet Evaluator (`bds-QRE`). FailureForge severities equal QRE issue severities, and clusters carry stable fingerprints, so a collector could map receipts to QRE observations. QRE accepts evidence only from authorized, non-simulated collectors, and no checkpoint of `BDS-QRE-MODULE-v0.1` names FailureForge. Any such collector needs its own authorization.
+
+### FF-20260930-006 — A slice-10 test reads a moved file, so the CI gate fails on `master` (Open)
+
+**What is wrong:** `test_governance_docs_state_failureforge_role` (`tests/test_slice_10_governance_reconciliation.py:169`) reads `doc/system/00_overview/00-purpose.md`. That file is now `doc/system/00-purpose.md`. The test fails with `FileNotFoundError`, and `scripts/ci_gate.sh` stops at its `pytest` step. Reproduced on `master` at `7250980`.
+
+**Root cause:** PR #4 (`5cec91d`) flattened `doc/system/` and did not update the test path.
+
+**Fix:** change the path to `doc/system/00-purpose.md`. The asserted sentences are still at `doc/system/00-purpose.md:9`. Not applied here.
+
+**Scope:** open.
