@@ -52,12 +52,24 @@ This file tracks open defects, gaps, and their history. Each entry has a date, w
 
 No plan connects FailureForge to the Quality-Ratchet Evaluator (`bds-QRE`). FailureForge severities equal QRE issue severities, and clusters carry stable fingerprints, so a collector could map receipts to QRE observations. QRE accepts evidence only from authorized, non-simulated collectors, and no checkpoint of `BDS-QRE-MODULE-v0.1` names FailureForge. Any such collector needs its own authorization.
 
-### FF-20260930-006 — A slice-10 test reads a moved file, so the CI gate fails on `master` (Open)
+### FF-20260930-006 — A slice-10 test reads a moved file, so the local gate fails on `master` (Open)
 
 **What is wrong:** `test_governance_docs_state_failureforge_role` (`tests/test_slice_10_governance_reconciliation.py:169`) reads `doc/system/00_overview/00-purpose.md`. That file is now `doc/system/00-purpose.md`. The test fails with `FileNotFoundError`, and `scripts/ci_gate.sh` stops at its `pytest` step. Reproduced on `master` at `7250980`.
 
 **Root cause:** PR #4 (`5cec91d`) flattened `doc/system/` and did not update the test path.
 
-**Fix:** change the path to `doc/system/00-purpose.md`. The asserted sentences are still at `doc/system/00-purpose.md:9`. Not applied here.
+**Fix:** PR #7 changes the path to `doc/system/00-purpose.md`. The asserted sentences are still at `doc/system/00-purpose.md:9`. The local gate passes on that branch.
+
+**Scope:** open.
+
+### FF-20260930-007 — GitHub Actions jobs get no runner (Open)
+
+**What is wrong:** every CI Gate run since 2026-09-25 (runs 10 to 15) ends in 2 to 8 seconds with conclusion `failure`, `runner_id: 0` and no runner name. No log exists. No step runs, not even checkout. This covers #4, its push to `master`, #5, #6 and #7. A re-run of #7 on 2026-09-30 failed the same way. The last successful run (2026-09-09) took about 20 seconds.
+
+**Root cause:** not determined from the API. A job that never gets a runner usually means Actions is blocked at the account or repository level, for example a spending limit or a billing problem. The run annotation names the cause.
+
+**Consequence:** a red CI Gate check in this period says nothing about the code. FF-20260930-006 was found by a local run, not by CI.
+
+**Fix:** none from the repository. Check the Actions billing and settings for the account.
 
 **Scope:** open.
