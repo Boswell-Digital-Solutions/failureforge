@@ -166,9 +166,7 @@ def test_failurecase_schema_did_not_gain_new_attack_family():
 
 def test_governance_docs_state_failureforge_role():
     readme = (_ROOT / "README.md").read_text(encoding="utf-8")
-    system = (_ROOT / "doc/system/00_overview/00-purpose.md").read_text(
-        encoding="utf-8"
-    )
+    system = (_ROOT / "doc/system/00-purpose.md").read_text(encoding="utf-8")
 
     assert "Sandbox-only" in readme or "sandbox-only" in readme
     assert "may not mutate canonical repositories" in system
