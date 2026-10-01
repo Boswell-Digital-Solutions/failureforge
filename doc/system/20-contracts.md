@@ -40,10 +40,13 @@ sort_keys=True, separators=(",", ":"), ensure_ascii=False)`.
 - `build_hardening_report` always sets it. A report written before this field stays valid.
 - `compute_report_hash`, `apply_report_hash` and `verify_report_hash` are in
   `failureforge.validation`.
-- A ranked finding has a float `score`. Python writes a float with its shortest
-  round-trip text, for example `1e-07` and `100.0`. A program in another language
-  must write the same text to recompute the hash. Until a float rule is agreed, such a
-  program can read the stored hash but cannot check it.
+- The schema allows a ranked finding `score` to be any number. The scorer today adds
+  integer weights, so it always writes an integer (checked 2026-09-30: every weight is
+  an `int`, and a real run gave scores such as 96 and 33). A report with a float
+  `score` is valid. Python writes a float with its shortest round-trip text, for
+  example `1e-07` and `100.0`, and the hash depends on that text. A program in another
+  language can recompute the hash for every report the scorer writes today. It cannot
+  do so for a float until it matches Python's float text.
 - The hash lets a consumer bind a report to an attestation. The forge_contract_core
   family `failureforge_handoff_attestation_payload` carries it as
   `hardening_report_hash` (RFC-FFQ-01).
