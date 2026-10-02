@@ -3,8 +3,24 @@ name: CI Gate
 on:
   push:
     branches: [master]
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!doc/**'
+      - '!**/*.md'
+      - 'README.md'
+      - 'doc/system/00-purpose.md'
+      - 'sandbox-targets/**'
   pull_request:
     branches: [master]
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!doc/**'
+      - '!**/*.md'
+      - 'README.md'
+      - 'doc/system/00-purpose.md'
+      - 'sandbox-targets/**'
 
 permissions:
   contents: read
