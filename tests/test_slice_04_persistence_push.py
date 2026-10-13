@@ -132,9 +132,14 @@ def test_push_is_non_blocking_when_dataforge_unreachable(tmp_path: Path):
         bad.close()
 
 
-def test_promotion_transition_via_client(
+def test_no_route_changes_a_receipt_status_from_failureforge(
     tmp_path: Path, client: DataForgeFailureForgeClient, app: FastAPI
 ):
+    """FailureForge pushes evidence; it cannot move a receipt's promotion status.
+
+    The old ungated ``POST /receipts/{id}/promotion`` does not exist in
+    DataForge Local. A status change is a Forge_Command-signed approval.
+    """
     sandbox = tmp_path / "sandbox"
     sandbox.mkdir()
     runner = SandboxRunner(
@@ -148,9 +153,12 @@ def test_promotion_transition_via_client(
     receipt_id = next(
         iter(app.state.failureforge_service.list_receipts(sandbox_run_id="SR-promo"))
     )["receipt_id"]
-    res = client.transition_promotion_status(
-        receipt_id, new_status="approved_for_test_generation"
+    assert not hasattr(client, "transition_promotion_status")
+
+    response = TestClient(app).post(
+        f"/api/v1/failureforge/receipts/{receipt_id}/promotion",
+        json={"new_status": "approved_for_test_generation"},
     )
-    assert res.outcome == PushOutcome.accepted
+    assert response.status_code in (404, 405)
     rec = app.state.failureforge_service.get_receipt(receipt_id)
-    assert rec["promotion_status"] == "approved_for_test_generation"
+    assert rec["promotion_status"] == "pending_operator_review"

@@ -3,8 +3,8 @@
 FailureForge is a sandbox-only failure-harvesting subsystem for Forge.
 
 It may create controlled failure probes, durable evidence, ranked hardening
-reports, root-cause clusters, advisory adjudication records, and governed
-promotion candidates.
+reports, root-cause clusters, advisory adjudication records, and proposal content for
+promotion candidates. Forge_Command signs and submits each candidate.
 
 It may not mutate canonical repositories, may not approve repair, may not
 bypass operator review, may not let model votes overwrite deterministic

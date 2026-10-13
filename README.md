@@ -15,7 +15,8 @@ bridge for Forge. Implementation-complete planning artifacts are archived under
   client integration.
 - **Slice 05** - Read-only operator report surface and morning-report CLI.
 - **Slice 06** - Operator approval and SMITH handshake through typed receipts
-  and an identity-gated FSM.
+  and an identity-gated FSM. Superseded by slice 26: FailureForge no longer
+  submits approvals or candidates.
 - **Slice 07** - Multi-agent expansion across chaos, mutation, reproduction,
   and classification lanes.
 - **Slice 08** - Centipede root-cause clustering and ranked fix-cluster reports.
@@ -48,8 +49,9 @@ bridge for Forge. Implementation-complete planning artifacts are archived under
   canonical repos.
 - Receipts are immutable after write. Modifying a receipt invalidates its hash
   and fails verification.
-- No direct patch promotion: operator approval and SMITH handoff are mediated
-  by explicit promotion/approval receipts and FSM checks.
+- No direct patch promotion: FailureForge produces evidence and proposal
+  content only. Forge_Command signs and submits each operator approval and
+  promotion candidate to DataForge Local; SMITH keeps the verdict.
 - Every reproducible failure has a replay command. Non-reproducible failures
   are explicitly marked.
 - Cluster generation preserves source disagreement instead of flattening lane
@@ -99,16 +101,21 @@ isolation** (container, seccomp, read-only root FS, no network).
 
 ## Cross-repo slices
 
-Slices 04–06 and the governance-reconciliation half of Slice 10 exercise the
-FailureForge → DataForge Local handshake, whose service/router code lives in the
-sibling **`dataforge-Local`** repo (and needs FastAPI). Those tests skip cleanly
-when this repo is checked out standalone (e.g. in its own CI); they run when
-`dataforge-Local` is present alongside this repo and FastAPI is installed.
+Slices 04, 05 and 26 and the governance-reconciliation half of Slice 10
+exercise the FailureForge → DataForge Local handshake, whose service/router code
+lives in the sibling **`dataforge-Local`** repo (and needs FastAPI). Those tests
+skip cleanly when this repo is checked out standalone (e.g. in its own CI); they
+run when `dataforge-Local` is present alongside this repo and FastAPI is
+installed.
 
-> **Open gap (2026-09-30).** `dataforge-Local` does not contain `app/failureforge/`.
-> With the sibling present and FastAPI installed, these tests do not skip; the
-> `app.failureforge` imports inside them are expected to fail. See
-> [`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md), FF-20260930-001.
+### Decision authority
+
+FailureForge pushes evidence: runs, cases, receipts and reports. It does not
+change a receipt's promotion status, approve, propose a candidate, withdraw,
+or call SMITH. DataForge Local accepts an approval or a promotion candidate only
+with a token that Forge_Command signed for that one decision (DataForge Local
+plan DFL-FFG-02, Forge_Command plan FC-FFQ-004). The `X-FailureForge-Writer`
+header is logged and never trusted. Slice 26 proves this from both sides.
 
 ## Layout
 
@@ -141,10 +148,8 @@ failureforge/
     verify_receipts.sh
 ```
 
-DataForge Local is specified to own the operator API and persistence-facing
-Slice 04-18 integration under `dataforge-Local/app/failureforge/`. That package
-does not exist in `dataforge-Local` today; see
-[`docs/KNOWN_ISSUES.md`](docs/KNOWN_ISSUES.md), FF-20260930-001.
+DataForge Local owns the operator API and the persistence-facing integration
+under `dataforge-Local/app/failureforge/`.
 
 ## Demo
 

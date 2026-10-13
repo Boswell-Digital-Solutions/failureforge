@@ -11,7 +11,8 @@ The current implementation includes:
 - Replay helpers for deterministic evidence checks.
 - DataForge Local push client semantics for accepted, rejected, and transport
   failure outcomes.
-- Operator approval and SMITH promotion-candidate handoff boundaries.
+- Operator approval and SMITH promotion-candidate handoff boundaries. FailureForge
+  stays on the evidence side of them: it holds no approval or candidate client.
 - Multi-lane failure agents.
 - Centipede root-cause clustering.
 - NeuroForge comparative adjudication where model votes remain advisory.
