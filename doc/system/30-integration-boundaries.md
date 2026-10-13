@@ -12,6 +12,10 @@ Boundary rules:
 - ERA exports must keep `safe_to_autofix=false`.
 - AAR seeds are not AAR conclusions and must cite receipt evidence.
 - SMITH promotion candidates require an operator approval receipt.
+- FailureForge does not submit approvals or promotion candidates, and does not
+  change a receipt's promotion status. Forge_Command signs each decision for
+  one receipt and one request, and DataForge Local verifies the token. The
+  `X-FailureForge-Writer` header carries no authority. Slice 26 tests this.
 - NeuroForge provider votes are advisory and cannot rewrite cluster evidence.
 - Target adapters are read-only execution boundaries; unsupported attack
   families fail before workspace copy.

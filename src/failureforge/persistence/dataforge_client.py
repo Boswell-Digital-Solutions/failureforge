@@ -121,15 +121,10 @@ class DataForgeFailureForgeClient:
             record_id=report.get("report_id"),
         )
 
-    def transition_promotion_status(
-        self, receipt_id: str, *, new_status: str
-    ) -> PushResult:
-        return self._post(
-            path=f"/api/v1/failureforge/receipts/{receipt_id}/promotion",
-            payload={"new_status": new_status},
-            record_type="failure_receipt",
-            record_id=receipt_id,
-        )
+    # There is deliberately no method that changes a receipt's promotion
+    # status. A status change is an operator decision: Forge_Command signs it
+    # and submits it to DataForge Local's POST /approvals. FailureForge
+    # produces evidence and never submits a decision.
 
     # ---- bundle push (run + N cases + N receipts + report) ----
 
@@ -227,7 +222,7 @@ class DataForgeFailureForgeClient:
                 raw=body,
             )
 
-        # FastAPI nests detail; promotion endpoint returns 200 with body.record present.
+        # FastAPI nests detail.
         if response.status_code == 200:
             return PushResult(
                 outcome=PushOutcome.accepted,

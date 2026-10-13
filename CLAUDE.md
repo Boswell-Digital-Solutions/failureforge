@@ -42,7 +42,7 @@ failureforge/
   scripts/                  # run_sandbox_once.sh, replay_failure.sh, verify_receipts.sh
 ```
 
-Cross-repo: Slices 04-06 and the governance-reconciliation half of Slice 10 exercise the FailureForge -> DataForge Local handshake, whose service/router code lives in the sibling `dataforge-Local` repo (requires FastAPI). Those tests skip cleanly when this repo is checked out standalone; they run when `dataforge-Local` is present alongside this repo. DataForge Local owns the operator API and persistence-facing integration under `dataforge-Local/app/failureforge/`.
+Cross-repo: Slices 04, 05 and 26 and the governance-reconciliation half of Slice 10 exercise the FailureForge -> DataForge Local handshake, whose service/router code lives in the sibling `dataforge-Local` repo (requires FastAPI). Those tests skip cleanly when this repo is checked out standalone; they run when `dataforge-Local` is present alongside this repo. DataForge Local owns the operator API and persistence-facing integration under `dataforge-Local/app/failureforge/`.
 
 ## Notes
 
@@ -51,7 +51,7 @@ Cross-repo: Slices 04-06 and the governance-reconciliation half of Slice 10 exer
 Core doctrine:
 - All destructive testing happens against **copied workspaces**, never canonical repos.
 - Receipts are immutable after write; modifying one invalidates its hash and fails verification.
-- No direct patch promotion — operator approval and SMITH handoff are mediated by explicit promotion/approval receipts and FSM checks.
+- No direct patch promotion — FailureForge produces evidence and proposal content only. Forge_Command signs and submits each operator approval and promotion candidate to DataForge Local, and SMITH keeps the verdict. Do not add a client that changes a promotion status, submits an approval or candidate, or sends `X-FailureForge-Writer`/`X-FailureForge-Token`; slice 26 guards this.
 - Every reproducible failure has a replay command; non-reproducible failures are explicitly marked.
 - ERA exports and AAR seeds are read-only bridge artifacts — they cannot claim fixes, bypass operator review, or mark evidence safe to autofix.
 - Non-demo targets require a target adapter (declared attack families + canonical mutation guards) and pass adapter preflight before any workspace copy.

@@ -42,7 +42,7 @@ Dated findings with source locks, evidence limits, proposed repair scope, and ex
 
 **Evidence.** Read-only source review of `failureforge`, `dataforge-Local`, `Forge_Command`, `ERA` and `bds-QRE`, all on branch `claude/failureforge-bad-qre-integration-66koo8`, and one run of `scripts/ci_gate.sh` in a local virtualenv.
 
-### FF-20260930-001 — The DataForge Local server side does not exist (Open)
+### FF-20260930-001 — The DataForge Local server side does not exist (Closed 2026-09-30)
 
 **What is wrong:** `README.md` and `CLAUDE.md` say DataForge Local owns the operator API under `dataforge-Local/app/failureforge/`. That package does not exist in `dataforge-Local`, and its `app/main.py` mounts no FailureForge router. Every HTTP client in this repository targets routes that no server provides: `persistence/dataforge_client.py`, `promotion/client.py` and `forgecommand/client.py`. The CLI commands `morning-report`, `view-run` and `view-receipt` cannot succeed.
 
@@ -50,19 +50,19 @@ Dated findings with source locks, evidence limits, proposed repair scope, and ex
 
 **Root cause:** not determined. The `dataforge-Local` clone is shallow, so an earlier removal is not ruled out. Tracked also in `dataforge-Local/docs/KNOWN_ISSUES.md`.
 
-**Fix:** none. `README.md` now states the gap.
+**Fix:** `dataforge-Local` PR #47 (DFL-FFG-01) added `app/failureforge/` with ingest and the operator reads; DFL-FFG-02 (PRs #50, #52, #53) added the approval and candidate routes. With the sibling present, the full suite passes (111 tests, 2026-10-13).
 
-**Scope:** open.
+**Scope:** closed.
 
-### FF-20260930-002 — The client can change promotion status without an approval receipt (Open)
+### FF-20260930-002 — The client can change promotion status without an approval receipt (Closed 2026-10-13)
 
 **What is wrong:** `DataForgeFailureForgeClient.transition_promotion_status` (`persistence/dataforge_client.py:124-132`) posts `{new_status}` to `/receipts/{id}/promotion` with no writer identity. `test_slice_04` calls it the same way. The doctrine says operator approval is mediated by an `ApprovalReceipt` (`POST /approvals`, `X-FailureForge-Writer: operator`). A server built to match this client would open a path around that gate.
 
 **Root cause:** the push-side client (slice 04) predates the approval handshake (slice 06), and the older route was kept.
 
-**Fix:** none. Remove the method, or make the server refuse the route.
+**Fix:** DataForge Local never built the route. This change removes `transition_promotion_status` and the whole `failureforge.promotion` package (`OperatorPromotionClient`, `SmithHandshakeClient`, the approval and candidate builders). The built design gives FailureForge no decision role: Forge_Command signs each approval and candidate for one receipt and one request, and DataForge Local verifies the token (DataForge Local plan DFL-FFG-02, rulings R3 and R8). Slice 26 replaces the slice 06 tests. It fails if FailureForge source names a decision route or the retired headers, and it proves that DataForge Local refuses an approval sent the old way and records no decision.
 
-**Scope:** open. It becomes a live defect only when DataForge Local implements the route.
+**Scope:** closed.
 
 ### FF-20260930-003 — Two receipt states have no producer (Open)
 
@@ -88,17 +88,17 @@ Dated findings with source locks, evidence limits, proposed repair scope, and ex
 
 No plan connects FailureForge to the Quality-Ratchet Evaluator (`bds-QRE`). FailureForge severities equal QRE issue severities, and clusters carry stable fingerprints, so a collector could map receipts to QRE observations. QRE accepts evidence only from authorized, non-simulated collectors, and no checkpoint of `BDS-QRE-MODULE-v0.1` names FailureForge. Any such collector needs its own authorization.
 
-### FF-20260930-006 — A slice-10 test reads a moved file, so the local gate fails on `master` (Open)
+### FF-20260930-006 — A slice-10 test reads a moved file, so the local gate fails on `master` (Closed 2026-09-30)
 
 **What is wrong:** `test_governance_docs_state_failureforge_role` (`tests/test_slice_10_governance_reconciliation.py:169`) reads `doc/system/00_overview/00-purpose.md`. That file is now `doc/system/00-purpose.md`. The test fails with `FileNotFoundError`, and `scripts/ci_gate.sh` stops at its `pytest` step. Reproduced on `master` at `7250980`.
 
 **Root cause:** PR #4 (`5cec91d`) flattened `doc/system/` and did not update the test path.
 
-**Fix:** PR #7 changes the path to `doc/system/00-purpose.md`. The asserted sentences are still at `doc/system/00-purpose.md:9`. The local gate passes on that branch.
+**Fix:** PR #7 (merged) changes the path to `doc/system/00-purpose.md`.
 
-**Scope:** open.
+**Scope:** closed.
 
-### FF-20260930-007 — GitHub Actions jobs get no runner (Open)
+### FF-20260930-007 — GitHub Actions jobs get no runner (Closed by 2026-10-02)
 
 **What is wrong:** every CI Gate run since 2026-09-25 (runs 10 to 15) ends in 2 to 8 seconds with conclusion `failure`, `runner_id: 0` and no runner name. No log exists. No step runs, not even checkout. This covers #4, its push to `master`, #5, #6 and #7. A re-run of #7 on 2026-09-30 failed the same way. The last successful run (2026-09-09) took about 20 seconds.
 
@@ -106,7 +106,21 @@ No plan connects FailureForge to the Quality-Ratchet Evaluator (`bds-QRE`). Fail
 
 **Consequence:** a red CI Gate check in this period says nothing about the code. FF-20260930-006 was found by a local run, not by CI.
 
-**Fix:** none from the repository. Check the Actions billing and settings for the account.
+**Fix:** none from the repository. Runners came back: CI Gate runs 27 and 28 (2026-10-02) completed with `success` in about 20 seconds. The account-level cause was not recorded here.
+
+**Scope:** closed.
+
+## 2026-10-13 Decision authority reconciliation — FF-20261013
+
+### FF-20261013-001 — Local approval and candidate schemas differ from the admitted contracts (Open)
+
+**What is wrong:** `schemas/ApprovalReceipt.v1.schema.json` and `schemas/PromotionCandidate.v1.schema.json` are FailureForge's local drafts. `forge_contract_core` admitted `failureforge_approval_receipt` and `failureforge_promotion_candidate` (CC-FFQ-04). The admitted approval requires `approval_hash`. The admitted candidate requires `candidate_hash` and `handoff_state`, and has withdrawal fields. The local candidate requires `smith_handoff_status` instead. The local hash helpers in `validation/hashing.py` (`apply_approval_hash`, `apply_candidate_hash`) follow the drafts.
+
+**Impact:** nothing in FailureForge builds or submits these objects after FF-20260930-002. Forge_Command drafts and signs them against the admitted contracts. The local drafts can still mislead a reader or a future client.
+
+**Root cause:** the contracts moved to `forge_contract_core` with the approval design. FailureForge kept its drafts (`x-contract-governance.promotion_status: draft`).
+
+**Fix:** none. Removing or marking the drafts is a contract-corpus change and needs its own decision.
 
 **Scope:** open.
 
