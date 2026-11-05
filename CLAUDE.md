@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repo Identity
+
+- Default branch: master
+
 ## Project Overview
 
 FailureForge is a sandbox-only failure-harvesting subsystem and read-only governance evidence bridge for Forge. It runs multi-agent lanes (chaos, mutation, reproduction, classification, edge-case) against copied target workspaces, produces immutable, schema-validated receipts and hardening reports, and bridges read-only evidence into governance (ERA/AAR) without ever claiming fixes or bypassing operator review. Implementation-complete planning artifacts for its 24 shipped slices are archived under `Drive/Forge/Plans/Implemented/failureforge` (see `docs/plans/IMPLEMENTED_PLAN_ARCHIVES.md`).
