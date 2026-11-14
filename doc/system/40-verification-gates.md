@@ -69,7 +69,7 @@ If a test or script starts to read another documentation path, add that path as 
 The Documentation CI is `.github/workflows/documentation.yml`.
 It runs on a change under `docs/`, under `doc/`, to any `*.md` file, or to its own workflow file.
 It runs `bash doc/system/BUILD.sh` and then `git diff --exit-code -- doc`.
-`doc/FFGSYSTEM.md` is not committed, so the diff step finds nothing by design.
+`doc/ffgSYSTEM.md` is not committed, so the diff step finds nothing by design.
 The build validates the parts. It does not compare against a committed reference (see KI-FFG-20260930-001).
 
 This repository has no secret scan workflow.

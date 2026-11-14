@@ -179,7 +179,7 @@ def test_slice_10_required_files_exist():
         "scripts/ci_gate.sh",
         "scripts/verify_no_canonical_mutation.sh",
         "doc/system/BUILD.sh",
-        "doc/FFGSYSTEM.md",
+        "doc/ffgSYSTEM.md",
         "schemas/FailureScore.v2.schema.json",
         "schemas/FailureForgeToERAExport.v1.schema.json",
         "schemas/FailureForgeAARSeed.v1.schema.json",
