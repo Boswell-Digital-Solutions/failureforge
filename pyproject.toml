@@ -28,7 +28,7 @@ testpaths = ["tests"]
 # Line length matches the codebase's existing wrap convention (Black-style).
 line-length = 88
 target-version = "py311"
-extend-exclude = ["sandbox", "reports", "doc/FFGSYSTEM.md"]
+extend-exclude = ["sandbox", "reports", "doc/ffgSYSTEM.md"]
 
 [tool.ruff.lint]
 # Start with the conservative subset: pyflakes, pycodestyle errors, isort,

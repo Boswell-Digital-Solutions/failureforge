@@ -35,11 +35,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Builds doc/FFGSYSTEM.md from doc/system/ and validates the snapshots.
+      # Builds doc/ffgSYSTEM.md from doc/system/ and validates the snapshots.
       - name: Build the system reference
         run: bash doc/system/BUILD.sh
 
-      # doc/FFGSYSTEM.md is not committed (it is in .gitignore), so this step
+      # doc/ffgSYSTEM.md is not committed (it is in .gitignore), so this step
       # finds no difference by design. The build itself validates the parts.
       - name: Fail if the assembled reference differs from its parts
         run: git diff --exit-code -- doc

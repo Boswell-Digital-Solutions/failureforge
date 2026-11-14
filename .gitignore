@@ -30,7 +30,7 @@ reports/failureforge-verification/
 # Generated aggregate doc (built from doc/system/*.md by doc/system/BUILD.sh;
 # embeds a build timestamp, so it churns every run). Source of truth is
 # doc/system/*.md.
-doc/FFGSYSTEM.md
+doc/ffgSYSTEM.md
 
 # Virtualenvs / local env
 .venv/
