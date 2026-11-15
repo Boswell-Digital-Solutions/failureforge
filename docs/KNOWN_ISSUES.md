@@ -124,6 +124,35 @@ No plan connects FailureForge to the Quality-Ratchet Evaluator (`bds-QRE`). Fail
 
 **Scope:** open.
 
+**2026-11-15 audit re-confirmed (BDS-ORG-ARCH-AUDIT-2026-11):** The audit read the implementation, which the 2026-09-30 review did not. The source agrees with the warning, and it adds exact evidence. This entry stays open as a documentation gap. The runtime property is not a new finding.
+- Observed (source): `failureforge@6ede8f6ff3:src/failureforge/runtime/sandbox.py:L440-L443` — `_copy_workspace` runs `shutil.copytree` of the target source.
+- Observed (source): `failureforge@6ede8f6ff3:src/failureforge/runtime/target_loader.py:L32-L37` — `spec_from_file_location` and `exec_module` load the copied `registry.py` in the runner process. `sandbox.py:L132` calls the loader. `:L161` redirects stdout and stderr in the same process.
+- Observed (source): a search of `src/` for `subprocess`, `os.system`, `docker`, `seccomp`, `unshare`, `chroot` and `rlimit` finds no use. No OS isolation exists.
+- Observed (source): `sandbox.py:L103-L109` and `:L401` — `CanonicalSourceMutationError` follows a hash of the canonical source before and after the run. The check is detective. It does not prevent a write, a network call or a subprocess.
+- Observed (source): `src/failureforge/runtime/target_adapter.py:L26-L83` — the `TargetAdapter.v1` guard checks adapter metadata, required commands on `PATH`, forbidden paths in the source tree and artifact roots. It does not restrict what the target code does.
+
+## 2026-11-15 — KI-FFG-20261115-001: The document tree states no lineage to the FailureForge code in the predecessor Forge_Command
+
+**Status: OPEN — documentation gap confirmed; no runtime repair performed.**
+
+**Source.** BDS-ORG-ARCH-AUDIT-2026-11. Verified by a read of `doc/system/` and a search of `src/` on `Boswell-Digital-Solutions/failureforge@6ede8f6ff3`. Nothing ran.
+
+**What is wrong.** The nine parts of `doc/system/` do not say how this repository relates to the FailureForge operator surface of the predecessor application Forge_Command. A search of all parts for "legacy", "predecessor", "ported", "extracted", "migrated", "origin", "lineage" and "descends" finds nothing. The only mentions of Forge_Command name it as the signer of decisions and candidates. A reader cannot tell whether this repository replaced, extracted or coexists with that surface.
+
+**Evidence.**
+- Observed (doc tree): `failureforge@6ede8f6ff3:doc/system/00-purpose.md:L7` — "Forge_Command signs and submits each candidate." `doc/system/30-integration-boundaries.md:L15-L17` — Forge_Command signs each decision.
+- Observed (source): `failureforge@6ede8f6ff3:src/failureforge/forgecommand/client.py:L3`, `:L35-L62` — a read-only `OperatorClient` over HTTP to DataForge Local routes under `/api/v1/failureforge/operator/`. `src/failureforge/forgecommand/__init__.py:L1-L7` — it renders text for the Forge Command morning briefing. The package is a client named for its consumer. It shares no module, no copied file and no import with the predecessor.
+- Observed (source): the sandbox runner, the five agent lanes and the target loader (`src/failureforge/runtime/`, `src/failureforge/agents/`) have no counterpart in the predecessor application. A search of `Forge_Command@84e47ab889` and `forge-command@2344fd2d4c` (`.rs`, `.py`, `.ts` files) for `SandboxRunner`, `load_registry_module` and `failureforge.runtime` finds no use. The code was not compared line by line.
+- Documented: `Forge_Command@84e47ab889:doc/system/06-tauri-command-interface.md:L109-L117` lists the predecessor's FailureForge command groups. They are an operator review and decision surface that reads DataForge Local.
+
+**Root cause.** Not determined.
+
+**Impact.** An operator who reads only this repository cannot tell which side owns the review surface after the move to the successor application. A reader can assume shared code that does not exist.
+
+**Fix.** None applied. Recommendation: add one section to `doc/system/30-integration-boundaries.md` that states the split: this repository runs probes, and the Forge Command applications show and sign the decisions. State that the two share no code. Then run `bash doc/system/BUILD.sh`.
+
+**Scope:** open.
+
 ## Review qualifications — not additional confirmed defects
 
 At the source lock above, `doc/system/20-contracts.md` describes the Slice 10 ERA/AAR bridge contracts and `TargetAdapter.v1` as locally owned drafts, with intended future shared-contract authority. A bridge implementation alone is not evidence of shared-contract admission. Current `forge_contract_core` admission was not reverified for this recording task, so this log neither asserts admission nor declares its absence. Reconcile admission and consumer evidence before making an ecosystem-wide interoperability claim; do not promote or alter contracts through this log.
